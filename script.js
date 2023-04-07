@@ -56,3 +56,27 @@ speechBtn.addEventListener("click", e =>{
         }
     }
 });
+
+const downloadBtn = document.querySelector("#download-btn");
+downloadBtn.addEventListener("click", () => {
+    const utterance = new SpeechSynthesisUtterance(textarea.value);
+    for (let voice of synth.getVoices()) {
+        if (voice.name === voiceList.value) {
+            utterance.voice = voice;
+        }
+    }
+    synth.cancel();
+    synth.speak(utterance);
+    utterance.addEventListener("end", () => {
+        const blob = new Blob([new Uint8Array(synth.getVoices()[0].synthesizeToFile(utterance))], {type: "audio/mp3"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "speech.mp3";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+    downloadBtn.disabled = true;
+});
